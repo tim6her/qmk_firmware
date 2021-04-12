@@ -18,16 +18,27 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include QMK_KEYBOARD_H
 
+enum custom_keycodes {
+  MY_MOD3 = SAFE_RANGE
+};
+
+enum {
+  TD_SS_BSPC = 0
+};
+qk_tap_dance_action_t tap_dance_actions[] = {
+  [TD_SS_BSPC] = ACTION_TAP_DANCE_DOUBLE(KC_LBRC, KC_BSPC)
+};
+
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   [0] = LAYOUT_split_3x6_3(
   //,-----------------------------------------------------.                    ,-----------------------------------------------------.
-      LCTL_T(KC_TAB), KC_Q, KC_W,   KC_E,    KC_R,    KC_T,                         KC_Y,    KC_U,    KC_I,    KC_O,   KC_P,  KC_Y,
+      LCTL_T(KC_TAB), KC_Q, KC_W,   KC_E,    KC_R,    KC_T,                         KC_Y,    KC_U,    KC_I,    KC_O,   KC_P,  TD(TD_SS_BSPC),
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
-      KC_CAPS,    KC_A,    KC_S,    KC_D,    KC_F,    KC_G,                         KC_H,    KC_J,    KC_K,    KC_L, KC_SCLN, KC_CAPS,
+      KC_CAPS,    KC_A,    KC_S,    KC_D,    KC_F,    KC_G,                         KC_H,    KC_J,    KC_K,    KC_L, KC_SCLN, MY_MOD3,
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
       KC_LSFT, RGUI_T(KC_Z), KC_X,  KC_C,    KC_V,    KC_B,                         KC_N,    KC_M, KC_COMM,  KC_DOT, RGUI_T(KC_SLSH),  KC_RSFT,
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
-                                        KC_LCTL, KC_LGUI, SH_T(KC_ENT),  KC_SPC, KC_RGUI, KC_RALT
+                                        KC_LCTL, KC_LGUI, KC_ENT,        KC_SPC, KC_RGUI, KC_RALT
                                       //`--------------------------'  `--------------------------'
 
   )
@@ -132,6 +143,20 @@ void oled_task_user(void) {
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   if (record->event.pressed) {
     set_keylog(keycode, record);
+  }
+  static uint16_t my_mod3_timer;
+  switch (keycode) {
+    case MY_MOD3:
+      if(record->event.pressed) {
+        my_mod3_timer = timer_read();
+        register_code(KC_CAPS); // Change the key to be held here
+      } else {
+        unregister_code(KC_CAPS); // Change the key that was held here, too!
+        if (timer_elapsed(my_mod3_timer) < TAPPING_TERM) {
+          SEND_STRING("\'"); // Change the character(s) to be sent on tap here
+        }
+      }
+      return false; // We handled this keypress
   }
   return true;
 }
