@@ -41,7 +41,7 @@ enum custom_keycodes {
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   [_QWERTY] = LAYOUT(
   //,-----------------------------------------------------.                    ,-----------------------------------------------------.
-      LCTL_T(KC_TAB), KC_Q, KC_W,   KC_E,    KC_R,    KC_T,                         KC_Y,    KC_U,    KC_I,    KC_O,   KC_P,  KC_QUOTE,
+      LCTL_T(KC_TAB), KC_Q, KC_W,   KC_E,    KC_R,    KC_T,                         KC_Y,    KC_U,    KC_I,    KC_O,   KC_P,  KC_LBRC,
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
       KC_CAPS,    KC_A,    KC_S,    KC_D,    KC_F,    KC_G,                         KC_H,    KC_J,    KC_K,    KC_L, KC_SCLN, MY_MOD3,
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
@@ -322,7 +322,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
       } else {
         layer_off(_LOWER);
         update_tri_layer_RGB(_LOWER, _RAISE, _ADJUST);
-        if (timer_elapsed(my_kc_timer) < TAPPING_TERM) {
+        if (timer_elapsed(my_kc_timer) < TAPPING_TERM + TAPPING_TERM_EXTRA) {
           SEND_STRING(" "); // Change the character(s) to be sent on tap here
         }
       }
@@ -335,7 +335,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
       } else {
         layer_off(_RAISE);
         update_tri_layer_RGB(_LOWER, _RAISE, _ADJUST);
-        if (timer_elapsed(my_kc_timer) < TAPPING_TERM) {
+        if (timer_elapsed(my_kc_timer) < TAPPING_TERM + TAPPING_TERM_EXTRA) {
           SEND_STRING("\n"); // Change the character(s) to be sent on tap here
         }
       }
@@ -350,11 +350,11 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     case MY_MOD3:
       if(record->event.pressed) {
         my_kc_timer = timer_read();
-        register_code(KC_CAPS); // Change the key to be held here
+        register_code(KC_BSLS); // Change the key to be held here
       } else {
-        unregister_code(KC_CAPS); // Change the key that was held here, too!
+        unregister_code(KC_BSLS); // Change the key that was held here, too!
         if (timer_elapsed(my_kc_timer) < TAPPING_TERM) {
-          SEND_STRING("\["); // Change the character(s) to be sent on tap here
+          SEND_STRING("\'"); // Change the character(s) to be sent on tap here
         }
       }
       return false; // We handled this keypress
